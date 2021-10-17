@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    input {
+        width: 200px;
+    }
+
+    #movies {
+        height: 200px;
+        width: 406px;
+        border: 1px solid black;
+        overflow: scroll;
+        border-top: none;
+        cursor: pointer;
+    }
+
+    #movies>div {
+        margin-top: 10px;
+    }
+
+    #movies div img {
+        width: 100px;
+    }
+
+    #details {
+        width: 60%;
+
+        border: 2px solid black;
+        margin: auto;
+        margin-top: 10px;
+        padding: 20px;
+    }
+
+    #details div img {
+        width: 200px;
+        margin: auto;
+    }
+</style>
+
+<body>
+    <input oninput="debounce(main, 1000)" type="text" id="movie" placeholder="Enter movie name" />
+
+    <div id="movies"></div>
+
+
+    <!-- //onclick="details()" -->
+
+
+    <div id="details"></div>
+</body>
+
+</html>
+
+<script>
+    var timerId;
+
+    let movies_div = document.getElementById("movies");
+
+    let details_div = document.getElementById("details");
+
+
+
+
+    // searchMovies; - done
+
+    async function searchMovies(movie_name) {
+
+        try {
+
+            let res = await fetch(`https://api.themoviedb.org/3/search/movie?api_key=953e797363b6f3c89ca3777aef55db6d&query=${movie_name}`);
+
+            let data = await res.json();
+
+            // console.log(data)
+            return data.results
+
+        } catch (e) {
+            console.log(e)
+        }
+
+    }
+
+    function appendMovies(movie) {
+
+
+        if (movie == undefined) {
+            return false
+        }
+        appendMovies.innerHTML = null;
+
+        movie.forEach(function (movie) {
+
+            let div = document.createElement("div");
+
+            let p = document.createElement("p");
+
+
+            p.innerText = movie.title;
+
+            let rating = document.createElement("p");
+
+
+            rating.innerText = movie.vote_average;
+
+            let img = document.createElement("img");
+            img.src = "http://image.tmdb.org/t/p/w500" + movie.poster_path;
+
+            let hr = document.createElement("hr")
+
+            let p1 = document.createElement('p');
+            p1.textContent = movie.id;
+            p1.style.display = 'none';
+
+            div.addEventListener("click", function () {
+                getmovie(movie.id)
+            })
+
+            div.append(img, p, rating, p1, hr)
+
+            movies_div.append(div);
+
+        });
+
+    }
+
+    async function main() {
+
+        let name = document.getElementById("movie").value;
+
+
+
+        // get search movies
+        if (name.length < 3) {
+            return false;
+        }
+
+
+        let res = await searchMovies(name);
+        appendMovies(res)
+        // console.log("res", res[0].id)
+
+        // for (var i = 0; i < res.length; i++) {
+        //     // console.log(res[i].id)
+        //     details(res[0].id)
+        // }
+
+    }
+
+
+
+    function debounce(func, delay) {
+
+        // lets talk about A
+        // func =  main();
+
+        //ave - setTimeout -func - main() - searchmovies("ave");
+
+        //aven -  clear the previous  - setTimeout -func - main() - searchmovies("aven")
+
+        if (timerId) {
+            clearTimeout(timerId)
+
+        }
+
+
+        timerId = setTimeout(function () {
+
+            func();
+
+        }, delay)
+
+
+
+    }
+
+
+
+
+
+    async function getmovie(movie_id) {
+
+
+        var res = await fetch(`https://api.themoviedb.org/3/movie/${movie_id}?api_key=953e797363b6f3c89ca3777aef55db6d&language=en-US`);
+
+
+        let data = await res.json();
+
+        // console.log(data)
+        details(data)
+
+
+    }
+
+
+
+    function details(data) {
+        // console.log(data)
+
+        details.innerHTML = null;
+
+        let div = document.createElement("div");
+
+
+        let name = document.createElement("h1")
+        name.innerText = data.original_title;
+
+        let name1 = document.createElement("p")
+        name1.innerText = data.overview;
+
+
+        let name2 = document.createElement("p")
+        name2.innerText = data.vote_average;
+
+        let name3 = document.createElement("p")
+        name3.innerText = data.release_date;
+
+        let name4 = document.createElement("img")
+        name4.src = "http://image.tmdb.org/t/p/w500" + data.poster_path;
+
+        div.append(name4, name, name1, name2, name3)
+
+        details_div.append(div);
+
+    }
+
+</script>
